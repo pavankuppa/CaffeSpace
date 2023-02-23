@@ -13,7 +13,7 @@ class OrdersController < ApplicationController
 
   # POST /orders
   def create
-    @order = Order.new(order_params)
+    @order = CreateOrderService.new(order_params).build
     if @order.save
       OrdersJob.set(wait: 1.minutes).perform_later(@order)
       render json: @order, status: :created, location: @order
@@ -44,7 +44,7 @@ class OrdersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def order_params
-      params.require(:order).permit(:order_number, :order_price, order_items_attributes: [:item_name, :offer_name, :offer_type, :quantity, :price, :discount_percentage, :free])
+      params.require(:order).permit(variants: [], offers: [])
     end
 
     def select_column_names
